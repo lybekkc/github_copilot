@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ---------------------------------------------------------------------------
+# Kotlin — update KOTLIN_VERSION here to upgrade, then rebuild the container
+# ---------------------------------------------------------------------------
+KOTLIN_VERSION="2.1.20"
+if ! command -v kotlinc &>/dev/null; then
+  echo "→ Installing Kotlin ${KOTLIN_VERSION}..."
+  curl -fsSL "https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip" \
+    -o /tmp/kotlin.zip
+  sudo unzip -q /tmp/kotlin.zip -d /opt
+  sudo ln -sf /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc
+  sudo ln -sf /opt/kotlinc/bin/kotlin   /usr/local/bin/kotlin
+  rm /tmp/kotlin.zip
+  echo "→ Kotlin installed."
+fi
+
+# ---------------------------------------------------------------------------
+
 # Start gnome-keyring so Copilot CLI can store tokens securely.
 # Idempotent: uses a shared env-file per UID so all terminals reuse the same daemon.
 if ! grep -q "copilot-keyring-env" ~/.bashrc 2>/dev/null; then

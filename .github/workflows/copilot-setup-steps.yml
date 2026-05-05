@@ -1,0 +1,91 @@
+name: "Copilot Setup Steps"
+
+# Run automatically when this file changes (easy validation) and allow manual runs.
+on:
+    workflow_dispatch:
+    push:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+    pull_request:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+    # MUST be named exactly `copilot-setup-steps` to be picked up by the Copilot cloud agent.
+    copilot-setup-steps:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # ── Rust ──────────────────────────────────────────────────────────
+            - name: Install Rust (stable)
+              uses: dtolnay/rust-toolchain@stable
+
+            # ── Java + Maven + Gradle ─────────────────────────────────────────
+            # To change the Java version: update java-version below.
+            - name: Set up Java 21 (Temurin)
+              uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: "21"
+
+            - name: Install Maven & Gradle
+              run: |
+                  sudo apt-get install -y --no-install-recommends maven gradle
+
+            # ── Kotlin ───────────────────────────────────────────────────────
+            # To upgrade: change KOTLIN_VERSION below.
+            - name: Install Kotlin
+              env:
+                  KOTLIN_VERSION: "2.1.20"
+              run: |
+                  curl -fsSL "https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip" \
+                    -o /tmp/kotlin.zip
+                  sudo unzip -q /tmp/kotlin.zip -d /opt
+                  sudo ln -sf /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc
+                  sudo ln -sf /opt/kotlinc/bin/kotlin   /usr/local/bin/kotlin
+                  rm /tmp/kotlin.zip
+
+            # ── Python + UV ───────────────────────────────────────────────────
+            # UV always installs the latest release.
+            - name: Install UV (fast Python package manager)
+              uses: astral-sh/setup-uv@v5
+
+            # ── kubectl ───────────────────────────────────────────────────────
+            - name: Install kubectl
+              uses: azure/setup-kubectl@v4
+
+            # ── Docker CE ─────────────────────────────────────────────────────
+            # Docker is pre-installed on ubuntu-latest runners; verify it's available.
+            - name: Verify Docker CE
+              run: docker --version
+
+            # ── PostgreSQL client ─────────────────────────────────────────────
+            - name: Install PostgreSQL client (psql)
+              run: |
+                  sudo apt-get install -y --no-install-recommends postgresql-client
+
+            # ── GitHub CLI ────────────────────────────────────────────────────
+            # gh is pre-installed on ubuntu-latest runners.
+            - name: Verify gh CLI
+              run: gh --version
+
+            # ── Sanity check ──────────────────────────────────────────────────
+            - name: Print installed tool versions
+              run: |
+                  echo "=== Rust ===" && rustc --version && cargo --version
+                  echo "=== Java ===" && java --version
+                  echo "=== Maven ===" && mvn --version
+                  echo "=== Gradle ===" && gradle --version
+                  echo "=== Kotlin ===" && kotlinc -version
+                  echo "=== Python ===" && python3 --version
+                  echo "=== UV ===" && uv --version
+                  echo "=== kubectl ===" && kubectl version --client
+                  echo "=== Docker ===" && docker --version
+                  echo "=== psql ===" && psql --version
+                  echo "=== gh ===" && gh --version
+                  echo "=== git ===" && git --version
