@@ -19,6 +19,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # To upgrade: uv self update   |   or rebuild container (always fetches latest)
 RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local sh
 
+# Ensure the sandbox workspace is writable by the node user
+RUN mkdir -p /workspaces/sandbox && chown node:node /workspaces/sandbox
+
 # GitLab CLI (glab)
 RUN curl -fsSL "https://gitlab.com/gitlab-org/cli/-/releases/v1.92.1/downloads/glab_1.92.1_linux_amd64.tar.gz" \
     | tar -xz -C /usr/local/bin --strip-components=1 bin/glab

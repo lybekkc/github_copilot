@@ -173,7 +173,33 @@ The workflow also runs automatically on every push/PR that modifies it, so you c
 
 ---
 
-## Security note
+## Troubleshooting
+
+### `/workspaces/sandbox` is not writable
+Fixed in the Dockerfile — the directory is now created and owned by the `node` user at build time. If you still hit this, do a full rebuild:
+`Cmd/Ctrl+Shift+P` → **Dev Containers: Rebuild Container Without Cache**
+
+### Private repo — authentication required
+The devcontainer forwards two things from your Mac automatically:
+
+- **`~/.gitconfig`** — mounted read-only, so your git identity and any credential helpers carry over
+- **SSH agent** — the macOS SSH agent socket is forwarded via `SSH_AUTH_SOCK`
+
+For SSH to work, make sure your key is loaded on the host before opening the container:
+```bash
+ssh-add ~/.ssh/id_ed25519   # or id_rsa
+ssh-add -l                  # verify it's loaded
+```
+
+For HTTPS private repos, authenticate `gh` inside the container once:
+```bash
+gh auth login
+gh auth setup-git   # configures git to use gh as credential helper
+```
+
+---
+
+
 
 The sandbox is isolated — the AI cannot read or modify files on your Mac outside of the mounted project folder. Rebuild the container at any time to get a clean slate.
 
