@@ -21,7 +21,6 @@
     "vscode": {
       "extensions": [
         "GitHub.copilot",
-        "GitHub.copilot-chat",
         "rust-lang.rust-analyzer",
         "fwcd.kotlin",
         "ms-python.python",
