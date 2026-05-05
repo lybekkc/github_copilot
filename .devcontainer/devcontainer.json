@@ -33,5 +33,5 @@
   },
   "forwardPorts": [3000, 5173, 8000, 8080],
   "remoteUser": "node",
-  "workspaceFolder": "/workspaces/github_copilot"
+  "workspaceFolder": "/workspaces/sandbox"
 }
